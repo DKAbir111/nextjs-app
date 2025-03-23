@@ -1,6 +1,6 @@
+"use client"
 import Link from "next/link"
-
-
+import { usePathname } from "next/navigation"
 export default function Navbar() {
     const router = [
         {
@@ -16,12 +16,20 @@ export default function Navbar() {
             path: '/blog'
         },
         {
-            name: 'Contact',
-            path: '/contact'
+            name: 'Dashboard',
+            path: '/dashboard'
         }
     ]
+
+    const pathname = usePathname()
+    const isDashboard = pathname.includes('dashboard')
+    if (isDashboard) {
+        return (
+            <></>
+        )
+    }
     return (
-        <nav >
+        <nav className="fixed top-0 z-20 right-0 left-0 shadow-md">
             <ul className="flex justify-evenly h-full py-5  bg-purple-400">
                 {
                     router.map((route, index) => {
