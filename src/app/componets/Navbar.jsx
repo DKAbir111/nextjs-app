@@ -16,16 +16,22 @@ export default function Navbar() {
             path: '/blog'
         },
         {
+            name: 'Meal',
+            path: '/meal'
+        },
+        {
             name: 'Dashboard',
             path: '/dashboard'
         }
+
     ]
 
     const pathname = usePathname()
     const isDashboard = pathname.includes('dashboard')
     if (isDashboard) {
         return (
-            <></>
+            <>
+            </>
         )
     }
     return (
@@ -35,7 +41,10 @@ export default function Navbar() {
                     router.map((route, index) => {
                         return (
                             <li key={index}>
-                                <Link href={route.path}>{route.name}</Link>
+                                <Link href={route.path}
+                                    className={`px-3 py-2 rounded-md transition-all ${pathname === route.path ? "bg-white text-purple-400 font-semibold" : "text-white"
+                                        }`}
+                                >{route.name}</Link>
                             </li>
                         )
                     })
