@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/pagination";
 
 const images = [
     "https://img.daisyui.com/images/stock/photo-1507358522600-9f71e620c44e.webp",
@@ -14,7 +13,7 @@ const images = [
     "https://img.daisyui.com/images/stock/photo-1507358522600-9f71e620c44e.webp",
 ];
 
-const SLIDE_DURATION = 3000; // milliseconds
+const SLIDE_DURATION = 3000;
 
 const SliderWithProgress = () => {
     const [progressArray, setProgressArray] = useState(
@@ -23,10 +22,10 @@ const SliderWithProgress = () => {
     const swiperRef = useRef(null);
     const intervalRef = useRef(null);
     const activeIndexRef = useRef(0);
+    const router = useRouter();
 
     const startProgress = (index) => {
         if (intervalRef.current) clearInterval(intervalRef.current);
-
         const startTime = Date.now();
 
         intervalRef.current = setInterval(() => {
@@ -41,8 +40,42 @@ const SliderWithProgress = () => {
 
             if (percentage >= 100) {
                 clearInterval(intervalRef.current);
+                goNext(false); // false = auto slide
             }
-        }, 50); // update every 50ms for smooth animation
+        }, 50);
+    };
+
+    const goNext = (byTap = true) => {
+        const swiper = swiperRef.current;
+        const currentIndex = activeIndexRef.current;
+        if (!swiper) return;
+
+        if (currentIndex === images.length - 1) {
+            if (byTap) {
+                router.push("/details"); // only tap on last goes to /details
+            } else {
+                swiper.slideTo(0); // auto go back to first
+            }
+        } else {
+            swiper.slideNext();
+        }
+    };
+
+    const goPrev = () => {
+        const swiper = swiperRef.current;
+        if (!swiper) return;
+        swiper.slidePrev();
+    };
+
+    const handleTap = (e) => {
+        const bounds = e.currentTarget.getBoundingClientRect();
+        const clickX = e.clientX - bounds.left;
+
+        if (clickX > bounds.width / 2) {
+            goNext(true); // tap to next
+        } else {
+            goPrev(); // tap to prev
+        }
     };
 
     useEffect(() => {
@@ -53,11 +86,17 @@ const SliderWithProgress = () => {
     }, []);
 
     return (
-        <div className="relative w-full max-w-lg mx-auto">
+        <div
+            className="relative w-full max-w-lg mx-auto cursor-pointer"
+            onClick={handleTap}
+        >
             {/* Progress Bars */}
             <div className="absolute top-0 left-0 w-full flex gap-2 px-2 pt-2 z-10">
                 {progressArray.map((progress, index) => (
-                    <div key={index} className="flex-1 h-1 bg-gray-300 rounded overflow-hidden">
+                    <div
+                        key={index}
+                        className="flex-1 h-1 bg-gray-300 rounded overflow-hidden"
+                    >
                         <div
                             className="h-full bg-green-500 transition-all duration-[50ms]"
                             style={{ width: `${progress}%` }}
@@ -68,18 +107,20 @@ const SliderWithProgress = () => {
 
             {/* Swiper Slider */}
             <Swiper
-                modules={[Pagination, Autoplay]}
-                autoplay={{ delay: SLIDE_DURATION, disableOnInteraction: false }}
-                pagination={{ clickable: true }}
+                loop={false} // we handle manual loop
+                onSwiper={(swiper) => {
+                    swiperRef.current = swiper;
+                }}
                 onSlideChange={(swiper) => {
                     const newIndex = swiper.activeIndex;
                     activeIndexRef.current = newIndex;
 
                     const newProgressArray = images.map((_, i) => {
-                        if (i < newIndex) return 100;      // previously viewed slides
-                        if (i === newIndex) return 0;       // current slide
-                        return 0;                           // future slides
+                        if (i < newIndex) return 100;
+                        if (i === newIndex) return 0;
+                        return 0;
                     });
+
                     setProgressArray(newProgressArray);
                     startProgress(newIndex);
                 }}
