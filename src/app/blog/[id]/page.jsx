@@ -14,7 +14,7 @@ async function fetchPosts(id) {
 export async function generateMetadata({ params }) {
     const { id } = await params
 
-    // fetch data
+
     const post = await fetchPosts(id);
 
 

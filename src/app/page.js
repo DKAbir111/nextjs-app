@@ -1,3 +1,4 @@
+import SliderWithProgress from "./componets/SliderWithProgress";
 
 export default function Home() {
   return (
@@ -17,6 +18,8 @@ export default function Home() {
           <button className="btn bg-purple-400 border-purple-400 shadow-none">Get Started</button>
         </div>
       </div>
+
+      <SliderWithProgress />
     </div>
   );
 }
